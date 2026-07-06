@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rincón Literario — Reseñas e Intercambio de Libros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <h1 class="site-title">Rincón Literario</h1>
+    <p class="site-subtitle">Reseñas de libros e intercambios entre lectores</p>
+  </div>
+  <div class="user-box">
+    <span id="currentUserLabel">Invitado</span>
+    <button id="changeUserBtn" class="btn-link">cambiar</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="reviews">Reseñas</button>
+  <button class="tab-btn" data-tab="catalog">Catálogo de Intercambio</button>
+  <button class="tab-btn" data-tab="myexchanges">Mis Intercambios</button>
+</nav>
+
+<main>
+  <section id="tab-reviews" class="tab-panel active">
+    <div class="panel-header">
+      <h2>Reseñas de la comunidad</h2>
+      <button id="newReviewBtn" class="btn-primary">+ Nueva reseña</button>
+    </div>
+    <div id="reviewsList" class="cards-grid"></div>
+  </section>
+
+  <section id="tab-catalog" class="tab-panel">
+    <div class="panel-header">
+      <h2>Libros disponibles para intercambio</h2>
+      <button id="newListingBtn" class="btn-primary">+ Publicar mi libro</button>
+    </div>
+    <div id="catalogList" class="cards-grid"></div>
+  </section>
+
+  <section id="tab-myexchanges" class="tab-panel">
+    <h2>Solicitudes recibidas</h2>
+    <div id="receivedRequests" class="requests-list"></div>
+    <h2>Solicitudes enviadas</h2>
+    <div id="sentRequests" class="requests-list"></div>
+  </section>
+</main>
+
+<div id="bookSearchModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" data-close="bookSearchModal">×</button>
+    <h3 id="bookSearchTitle">Buscar libro</h3>
+    <input type="text" id="bookSearchInput" placeholder="Escribe el título o autor del libro...">
+    <div id="bookSearchResults" class="search-results"></div>
+  </div>
+</div>
+
+<div id="reviewFormModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" data-close="reviewFormModal">×</button>
+    <h3>Escribir reseña</h3>
+    <div id="reviewBookPreview" class="book-preview"></div>
+    <label>Tu calificación</label>
+    <div id="starPicker" class="star-picker"></div>
+    <label for="reviewText">Tu reseña</label>
+    <textarea id="reviewText" rows="5" placeholder="¿Qué te pareció el libro?"></textarea>
+    <button id="submitReviewBtn" class="btn-primary">Publicar reseña</button>
+  </div>
+</div>
+
+<div id="listingFormModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" data-close="listingFormModal">×</button>
+    <h3>Publicar libro para intercambio</h3>
+    <div id="listingBookPreview" class="book-preview"></div>
+    <label for="listingCondition">Estado del libro</label>
+    <select id="listingCondition">
+      <option>Como nuevo</option>
+      <option>Buen estado</option>
+      <option>Usado, con signos de uso</option>
+      <option>Desgastado</option>
+    </select>
+    <label for="listingNotes">Notas (opcional)</label>
+    <textarea id="listingNotes" rows="3" placeholder="Comentarios sobre el ejemplar, edición, etc."></textarea>
+    <button id="submitListingBtn" class="btn-primary">Publicar</button>
+  </div>
+</div>
+
+<div id="proposeModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" data-close="proposeModal">×</button>
+    <h3>Proponer intercambio</h3>
+    <div id="proposeTargetPreview" class="book-preview"></div>
+    <label for="proposeSelect">Elige uno de tus libros publicados para ofrecer</label>
+    <select id="proposeSelect"></select>
+    <label for="proposeMessage">Mensaje (opcional)</label>
+    <textarea id="proposeMessage" rows="3" placeholder="Escribe un mensaje para el otro lector..."></textarea>
+    <button id="submitProposeBtn" class="btn-primary">Enviar propuesta</button>
+  </div>
+</div>
+
+<div id="userModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" data-close="userModal">×</button>
+    <h3>¿Cómo te llamas?</h3>
+    <p class="hint">Este nombre identificará tus reseñas y publicaciones en este navegador.</p>
+    <input type="text" id="userNameInput" placeholder="Tu nombre">
+    <button id="saveUserBtn" class="btn-primary">Guardar</button>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>Prototipo — los datos se guardan localmente en tu navegador. Portadas cortesía de Google Books.</p>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
