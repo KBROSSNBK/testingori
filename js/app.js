@@ -16,6 +16,32 @@
     return d.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
   }
 
+  var toastTimer = null;
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 3200);
+  }
+
+  var confirmCallback = null;
+  function showConfirm(msg, onYes) {
+    document.getElementById('confirmMessage').textContent = msg;
+    confirmCallback = onYes;
+    openModal('confirmModal');
+  }
+  document.getElementById('confirmYesBtn').addEventListener('click', function () {
+    var cb = confirmCallback;
+    confirmCallback = null;
+    closeModal('confirmModal');
+    if (cb) cb();
+  });
+  document.getElementById('confirmNoBtn').addEventListener('click', function () {
+    confirmCallback = null;
+    closeModal('confirmModal');
+  });
+
   var currentUser = localStorage.getItem('rl_user') || '';
   var reviews = loadData('rl_reviews');
   var listings = loadData('rl_listings');
@@ -28,7 +54,10 @@
   var searchTimer = null;
 
   function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    if (id === 'confirmModal') { confirmCallback = null; }
+  }
 
   document.querySelectorAll('.modal-close').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -37,7 +66,7 @@
   });
   document.querySelectorAll('.modal').forEach(function (m) {
     m.addEventListener('click', function (e) {
-      if (e.target === m) { m.classList.add('hidden'); }
+      if (e.target === m) { closeModal(m.id); }
     });
   });
 
@@ -59,7 +88,7 @@
   });
   document.getElementById('saveUserBtn').addEventListener('click', function () {
     var val = document.getElementById('userNameInput').value.trim();
-    if (!val) { alert('Por favor escribe un nombre.'); return; }
+    if (!val) { showToast('Por favor escribe un nombre.'); return; }
     currentUser = val;
     localStorage.setItem('rl_user', currentUser);
     refreshUserLabel();
@@ -201,9 +230,9 @@
 
   document.getElementById('submitReviewBtn').addEventListener('click', function () {
     if (!currentUser) { openModal('userModal'); return; }
-    if (currentRating < 1) { alert('Por favor selecciona una calificación de 1 a 5 estrellas.'); return; }
+    if (currentRating < 1) { showToast('Por favor selecciona una calificación de 1 a 5 estrellas.'); return; }
     var text = document.getElementById('reviewText').value.trim();
-    if (!text) { alert('Por favor escribe tu reseña.'); return; }
+    if (!text) { showToast('Por favor escribe tu reseña.'); return; }
     reviews.unshift({
       id: uid(),
       book: selectedBook,
@@ -215,6 +244,7 @@
     saveData('rl_reviews', reviews);
     closeModal('reviewFormModal');
     renderReviews();
+    showToast('¡Reseña publicada!');
   });
 
   function openListingForm() {
@@ -240,6 +270,7 @@
     saveData('rl_listings', listings);
     closeModal('listingFormModal');
     renderCatalog();
+    showToast('¡Libro publicado en el catálogo!');
   });
 
   function starDisplay(rating) {
@@ -344,11 +375,12 @@
           delBtn.className = 'btn-secondary';
           delBtn.textContent = 'Eliminar publicación';
           delBtn.addEventListener('click', function () {
-            if (confirm('¿Eliminar esta publicación?')) {
+            showConfirm('¿Eliminar esta publicación?', function () {
               listings = listings.filter(function (l) { return l.id !== item.id; });
               saveData('rl_listings', listings);
               renderCatalog();
-            }
+              showToast('Publicación eliminada.');
+            });
           });
           body.appendChild(delBtn);
         }
@@ -371,7 +403,7 @@
   function openProposeModal(listing) {
     var myListings = listings.filter(function (l) { return l.owner === currentUser && l.status === 'available'; });
     if (myListings.length === 0) {
-      alert('Primero debes publicar al menos un libro disponible para poder proponer un intercambio.');
+      showToast('Primero debes publicar al menos un libro disponible para poder proponer un intercambio.');
       return;
     }
     proposeTargetListing = listing;
@@ -393,7 +425,7 @@
   document.getElementById('submitProposeBtn').addEventListener('click', function () {
     var offeredId = document.getElementById('proposeSelect').value;
     var offeredListing = listings.find(function (l) { return l.id === offeredId; });
-    if (!offeredListing) { alert('Selecciona un libro para ofrecer.'); return; }
+    if (!offeredListing) { showToast('Selecciona un libro para ofrecer.'); return; }
     requests.unshift({
       id: uid(),
       listingId: proposeTargetListing.id,
@@ -409,7 +441,7 @@
     saveData('rl_requests', requests);
     closeModal('proposeModal');
     renderMyExchanges();
-    alert('Propuesta enviada. Podrás ver su estado en "Mis Intercambios".');
+    showToast('Propuesta enviada. Podrás ver su estado en "Mis Intercambios".');
   });
 
   function statusLabel(status) {
@@ -484,6 +516,7 @@
           requests = requests.filter(function (r) { return r.id !== req.id; });
           saveData('rl_requests', requests);
           renderMyExchanges();
+          showToast('Propuesta cancelada.');
         });
         card.appendChild(cancelBtn);
       }
@@ -511,6 +544,7 @@
     saveData('rl_listings', listings);
     renderMyExchanges();
     renderCatalog();
+    showToast('¡Intercambio aprobado!');
   }
 
   function rejectRequest(reqId) {
@@ -519,6 +553,7 @@
     req.status = 'rejected';
     saveData('rl_requests', requests);
     renderMyExchanges();
+    showToast('Propuesta rechazada.');
   }
 
   renderReviews();
