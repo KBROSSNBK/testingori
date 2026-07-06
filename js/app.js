@@ -81,30 +81,33 @@
   function doSearch(query) {
     var resultsBox = document.getElementById('bookSearchResults');
     resultsBox.textContent = 'Buscando...';
-    var url = 'https://www.googleapis.com/books/v1/volumes?maxResults=12&q=' + encodeURIComponent(query);
+    var url = 'https://openlibrary.org/search.json?limit=12&q=' + encodeURIComponent(query);
     fetch(url).then(function (r) { return r.json(); }).then(function (data) {
       resultsBox.innerHTML = '';
-      if (!data.items || data.items.length === 0) {
+      var items = data.docs || [];
+      if (items.length === 0) {
         resultsBox.textContent = 'No se encontraron libros. Intenta con otro título.';
         return;
       }
-      data.items.forEach(function (item) {
-        var info = item.volumeInfo || {};
+      items.forEach(function (doc) {
         var thumb = '';
-        if (info.imageLinks) {
-          thumb = info.imageLinks.thumbnail || info.imageLinks.smallThumbnail || '';
+        if (doc.cover_i) {
+          thumb = 'https://covers.openlibrary.org/b/id/' + doc.cover_i + '-M.jpg';
+        } else if (doc.cover_edition_key) {
+          thumb = 'https://covers.openlibrary.org/b/olid/' + doc.cover_edition_key + '-M.jpg';
         }
-        thumb = thumb.replace('http://', 'https://');
+        var title = doc.title || 'Título desconocido';
+        var authors = doc.author_name ? doc.author_name.join(', ') : 'Autor desconocido';
         var card = document.createElement('div');
         card.className = 'search-result-item';
         var img = document.createElement('img');
         img.src = thumb || 'https://placehold.co/100x150?text=Sin+portada';
-        img.alt = info.title || 'Portada';
+        img.alt = title;
         var infoDiv = document.createElement('div');
         var titleEl = document.createElement('strong');
-        titleEl.textContent = info.title || 'Título desconocido';
+        titleEl.textContent = title;
         var authorEl = document.createElement('span');
-        authorEl.textContent = info.authors ? info.authors.join(', ') : 'Autor desconocido';
+        authorEl.textContent = authors;
         infoDiv.appendChild(titleEl);
         infoDiv.appendChild(document.createElement('br'));
         infoDiv.appendChild(authorEl);
@@ -112,9 +115,9 @@
         card.appendChild(infoDiv);
         card.addEventListener('click', function () {
           selectedBook = {
-            id: item.id,
-            title: info.title || 'Título desconocido',
-            authors: info.authors ? info.authors.join(', ') : 'Autor desconocido',
+            id: doc.key || uid(),
+            title: title,
+            authors: authors,
             thumbnail: thumb || ''
           };
           closeModal('bookSearchModal');
